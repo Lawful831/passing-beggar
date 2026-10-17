@@ -1,0 +1,19 @@
+{
+  "name": "passing-beggar",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A public HTTP 402 endpoint that asks passing AI agents for one dollar.",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "@x402/core": "^2.28.0",
+    "@x402/evm": "^2.28.0",
+    "@x402/express": "^2.28.0",
+    "@x402/fetch": "^2.28.0",
+    "ethers": "^6.17.0",
+    "express": "^5.3.0",
+    "qrcode": "^1.5.4"
+  }
+}

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Passing Beggar: what an x402 endpoint actually earns</title>
+<meta name="description" content="A public 402 endpoint that asks AI agents for one dollar. After a day: 5 directories, ~200 requests, 0 buyers, and a measurement bug that made me lie to myself.">
+<style>
+:root{--canvas:#06070A;--pane:rgba(255,255,255,.045);--frame:rgba(255,255,255,.14);--hair:rgba(255,255,255,.08);--ink:#F1F4F6;--dim:#9BA5AF;--accent:#9BE4DF}
+*{box-sizing:border-box}body{margin:0;background:var(--canvas);color:var(--ink);font:300 16px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.01em}
+.wrap{max-width:720px;margin:0 auto;padding:56px 20px 96px}
+h1{font-size:40px;line-height:1.08;font-weight:300;letter-spacing:-.02em;margin:0 0 10px}
+h2{font-size:19px;font-weight:400;margin:32px 0 10px}
+p{color:var(--ink);margin:0 0 14px}
+p.dim{color:var(--dim)}
+.pane{background:var(--pane);border:1px solid var(--frame);border-radius:16px;padding:20px;margin:18px 0}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;word-break:break-all}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--hair);color:var(--dim)}
+th{color:var(--ink);font-weight:400}
+td b{color:var(--ink);font-weight:400}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(155,228,223,.3)}
+ul{color:var(--dim);padding-left:20px}li{margin-bottom:6px}
+footer{margin-top:40px;color:var(--dim);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>A beggar that AI agents can pay</h1>
+<p class="dim">One day of a public HTTP 402 endpoint on the open internet. Five directories, around two hundred requests, zero buyers, and one bug that made my own ledger lie to me.</p>
+
+<div class="pane">
+<p><b>The service.</b> <span class="mono">GET /api/beg</span> asks a passing agent for 1.00 USDC on Base. Paying is optional. There is also <span class="mono">POST /api/task</span>, which buys a small piece of work from a human, answered in public. Machine surface: <span class="mono">/agents.md</span>, <span class="mono">/llms.txt</span>, <span class="mono">/openapi.json</span>, <span class="mono">/.well-known/x402</span>, <span class="mono">/api/stats</span>.</p>
+<p class="dim">Live at <a href="https://passing-beggar.94.72.112.144.sslip.io/">passing-beggar.94.72.112.144.sslip.io</a>. Source in the repository this page is built from.</p>
+</div>
+
+<h2>The ledger, honestly</h2>
+<table>
+<tr><th>Number</th><th>Value</th></tr>
+<tr><td>Logged requests</td><td><b>~209</b></td></tr>
+<tr><td>Attributable to strangers</td><td><b>4</b> (three uptime probes, one browser)</td></tr>
+<tr><td>Unattributable (pre-fix rows)</td><td><b>165</b></td></tr>
+<tr><td>Paid requests</td><td><b>0</b></td></tr>
+<tr><td>Dollars received</td><td><b>0.00</b> USDC</td></tr>
+<tr><td>Tasks queued</td><td><b>0</b></td></tr>
+</table>
+<p class="dim">The pre-fix visitors, by user agent: x402dash's verifier, Blue Hub's liveness probe hitting <span class="mono">POST /api/task</span> three times, a Telegram link preview, axios, Wget, a WordPress vulnerability scanner, and a phishing-kit scanner looking for <span class="mono">/js/twint_ch.js</span>. None of them paid. Only one payment-signed request exists in the whole log, and it was mine, from an unfunded wallet: the facilitator answered <span class="mono">insufficient_funds</span>.</p>
+
+<h2>The bug worth writing down</h2>
+<p><span class="mono">app.set('trust proxy', false)</span> was wrong. Behind a reverse proxy, <span class="mono">req.ip</span> is the proxy, so every HTTPS visitor collapsed into one hashed address. I then wrote an "exclude our own traffic" filter keyed on that hash, and the result was a ledger that reported nobody had arrived while real clients sat in the table.</p>
+<p class="dim">Same root cause, three more faults: the rate limiter keyed on the same address, so every HTTPS client shared one bucket; ledger writes happened inside the handler while settlement runs after it, so a failed settlement would have been recorded as a dollar; and the payer field read a header nothing sets. Old rows cannot be re-attributed, so they are reported as their own bucket instead of being counted or hidden.</p>
+
+<h2>What I would tell the next person</h2>
+<ul>
+<li>Fix attribution first. A measurement bug looks exactly like an empty market.</li>
+<li>Price below the caller's cap. Several agent wallets refuse a single call at a dollar; a cent clears almost all of them.</li>
+<li>Discovery is the bottleneck, not the price. Two accepted directory listings are not distribution.</li>
+<li>A receipt is not a product. A pre-payment trust check on a stranger's endpoint, and a human answer, are the two things here that could be sold.</li>
+<li>Public refusals are what keep an optional ask honest, and honest is the only brand a beggar has.</li>
+</ul>
+
+<footer>Built on Base with x402 v2, USDC, a free-tier keyless facilitator, and a hostname that ends in an IP address. MIT.</footer>
+</div>
+</body>
+</html>

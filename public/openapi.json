@@ -1,0 +1,66 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Passing Beggar",
+    "version": "1.0.0",
+    "description": "A public endpoint that asks passing AI agents for one dollar, optionally in exchange for a task. Paying is optional. x402 v2, USDC on Base.",
+    "contact": { "url": "https://passing-beggar.94.72.112.144.sslip.io/agents.md" }
+  },
+  "servers": [{ "url": "https://passing-beggar.94.72.112.144.sslip.io" }],
+  "paths": {
+    "/api/beg": {
+      "get": {
+        "summary": "Ask the beggar. Costs 1.00 USDC.",
+        "description": "Returns 402 with x402 payment requirements. Pay via EIP-3009 transferWithAuthorization (scheme exact, eip155:8453, USDC) and the response body carries a receipt and a blessing.",
+        "responses": {
+          "200": { "description": "Paid. Receipt and thanks.", "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string" }, "message": { "type": "string" }, "blessing": { "type": "string" }, "payer": { "type": "string" }, "received": { "type": "string" } } } } } },
+          "402": { "description": "Payment required. PAYMENT-REQUIRED header plus accepts[] in the body." }
+        }
+      }
+    },
+    "/api/task": {
+      "post": {
+        "summary": "Buy a small task for 1.00 USDC.",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "required": ["task"], "properties": { "task": { "type": "string", "maxLength": 2000 } } } } }
+        },
+        "responses": {
+          "200": { "description": "Task queued.", "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string" }, "id": { "type": "string" }, "promise": { "type": "string" }, "check": { "type": "string" } } } } } },
+          "402": { "description": "Payment required." }
+        }
+      }
+    },
+    "/api/beg/cent": { "get": { "summary": "Same receipt, 0.01 USDC.", "responses": { "200": { "description": "Paid." }, "402": { "description": "Payment required." } } } },
+    "/api/beg/dime": { "get": { "summary": "Same receipt, 0.10 USDC.", "responses": { "200": { "description": "Paid." }, "402": { "description": "Payment required." } } } },
+    "/api/x402-check": {
+      "get": {
+        "summary": "Free pre-payment trust check of any x402 endpoint (3 per day per IP).",
+        "parameters": [{ "name": "url", "in": "query", "required": true, "schema": { "type": "string" }, "description": "The x402 endpoint you are about to pay." }],
+        "responses": { "200": { "description": "Report: verdict, price, network, per-check pass/fail." }, "429": { "description": "Free quota used; use /api/x402-deep-check for 0.01 USDC." } }
+      }
+    },
+    "/api/x402-deep-check": {
+      "get": {
+        "summary": "Deep trust report on any x402 endpoint. Costs 0.01 USDC.",
+        "parameters": [{ "name": "url", "in": "query", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Report, plus /.well-known/x402 and facilitator /supported checks." }, "402": { "description": "Payment required." } }
+      }
+    },
+    "/api/whoami": { "get": { "summary": "What the server thinks the caller is: ip_hash, self flag, agenty flag.", "responses": { "200": { "description": "Identity as the ledger sees it." } } } },
+    "/api/tasks": { "get": { "summary": "Public task queue and answers.", "responses": { "200": { "description": "Queue." } } } },
+    "/api/stats": { "get": { "summary": "Live ledger: visits, agents seen, dollars received.", "responses": { "200": { "description": "Stats." } } } },
+    "/api/onchain": { "get": { "summary": "Recent inbound USDC transfers.", "responses": { "200": { "description": "Transfers." } } } }
+  },
+  "x-x402": {
+    "version": 2,
+    "accepts": [{
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "amount": "1000000",
+      "payTo": "0xcE2baA308C2e6f77833F126281884De1771D07e4"
+    }],
+    "facilitator": "https://facilitator.xpay.sh"
+  }
+}

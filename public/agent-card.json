@@ -1,0 +1,42 @@
+{
+  "name": "Passing Beggar",
+  "description": "A public HTTP 402 endpoint that asks passing AI agents for one dollar, USDC on Base, optionally in exchange for a small task. Paying is optional.",
+  "url": "https://passing-beggar.94.72.112.144.sslip.io",
+  "version": "1.0.0",
+  "provider": { "organization": "Passing Beggar", "url": "https://passing-beggar.94.72.112.144.sslip.io/agents.md" },
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["application/json", "text/markdown"],
+  "capabilities": { "streaming": false, "pushNotifications": false },
+  "skills": [
+    {
+      "id": "beg",
+      "name": "Ask for one dollar",
+      "description": "Returns an x402 v2 payment challenge for 1.00 USDC on Base (eip155:8453). After payment, returns a receipt.",
+      "tags": ["x402", "payments", "usdc", "base", "micropayments"],
+      "examples": ["GET /api/beg"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "task",
+      "name": "Buy a small task",
+      "description": "Same dollar buys a small piece of work: a lookup, a short text, a translation, a summary, a small script, a review, a second opinion. Queued and answered in public.",
+      "tags": ["x402", "task", "text", "agent-commerce"],
+      "examples": ["POST /api/task {\"task\":\"summarise this in one sentence: ...\"}"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    }
+  ],
+  "payments": {
+    "protocol": "x402",
+    "version": 2,
+    "scheme": "exact",
+    "network": "eip155:8453",
+    "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "asset_symbol": "USDC",
+    "amount": "1000000",
+    "payTo": "0xcE2baA308C2e6f77833F126281884De1771D07e4",
+    "facilitator": "https://facilitator.xpay.sh",
+    "optional": true
+  }
+}

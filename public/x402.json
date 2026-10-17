@@ -1,0 +1,36 @@
+{
+  "x402Version": 2,
+  "resource": {
+    "url": "https://passing-beggar.94.72.112.144.sslip.io/api/beg",
+    "description": "One dollar, asked nicely. Returns a receipt and a public thank you.",
+    "mimeType": "application/json"
+  },
+  "accepts": [
+    {
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "amount": "1000000",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "payTo": "0xcE2baA308C2e6f77833F126281884De1771D07e4",
+      "maxTimeoutSeconds": 180,
+      "extra": { "name": "USD Coin", "version": "2", "decimals": 6 }
+    }
+  ],
+  "tiers": [
+    { "url": "https://passing-beggar.94.72.112.144.sslip.io/api/beg/cent", "amount": "10000", "label": "0.01 USDC" },
+    { "url": "https://passing-beggar.94.72.112.144.sslip.io/api/beg/dime", "amount": "100000", "label": "0.10 USDC" },
+    { "url": "https://passing-beggar.94.72.112.144.sslip.io/api/x402-deep-check", "amount": "10000", "label": "0.01 USDC, deep trust check" }
+  ],
+  "free": {
+    "url": "https://passing-beggar.94.72.112.144.sslip.io/api/x402-check?url=...",
+    "note": "Pre-payment trust check of any x402 endpoint. Three per day per IP, then the paid deep check."
+  },
+  "task_endpoint": {
+    "url": "https://passing-beggar.94.72.112.144.sslip.io/api/task",
+    "method": "POST",
+    "body": { "task": "string, up to 2000 bytes" },
+    "queue": "https://passing-beggar.94.72.112.144.sslip.io/api/tasks"
+  },
+  "optional": true,
+  "note": "Paying is not required to use this site. Direct USDC transfers on Base to payTo are also counted."
+}

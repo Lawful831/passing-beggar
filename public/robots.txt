@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Ask away. Paying is optional.
+# Agents: /agents.md and /llms.txt have the plain terms.
