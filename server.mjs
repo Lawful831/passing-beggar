@@ -59,10 +59,12 @@ const SELF_IPS = new Set(
     .split(',').map((s) => s.trim()).filter(Boolean)
 );
 const SELF_IP_HASHES = new Set(
-  // b8d4be7c81 = sha256("94.72.112.144")[:10], the box's public IP. Do NOT add the old collapsed
-  // hash 739aa893d2 here: that was never an egress, it was Traefik's address leaking in while
-  // `trust proxy` was false, so it stood for every HTTPS visitor at once.
-  (process.env.SELF_IP_HASHES || 'b8d4be7c81')
+  // b8d4be7c81 = sha256("94.72.112.144")[:10], this box's public IP.
+  // f3ee6b1f52 = the egress of the headless browser this project is tested with (Windows-Chrome UA,
+  // 7 rows on 2026-10-17); without it our own page checks read as stranger visits.
+  // Do NOT add the old collapsed hash 739aa893d2 here: that was never an egress, it was Traefik's
+  // address leaking in while `trust proxy` was false, so it stood for every HTTPS visitor at once.
+  (process.env.SELF_IP_HASHES || 'b8d4be7c81,f3ee6b1f52')
     .split(',').map((s) => s.trim()).filter(Boolean)
 );
 const SELF_UA = new RegExp(process.env.SELF_UA_RE || 'merid-|self-probe|beggar-self', 'i');
@@ -371,7 +373,9 @@ app.get('/api/stats', (req, res) => {
   // House traffic is out of every headline number, as before. Rows logged before the trust-proxy
   // fix carry the collapsed Traefik hash, so their IPs are unusable: they cannot be called
   // strangers and they must not be called us either. They get their own bucket, reported honestly.
-  const isSelfRow = (v) => (v.ip === COLLAPSED_IP ? SELF_UA.test(v.ua || '') : Boolean(v.self));
+  const isSelfRow = (v) => (v.ip === COLLAPSED_IP
+    ? SELF_UA.test(v.ua || '')
+    : (Boolean(v.self) || SELF_IP_HASHES.has(v.ip))); // hashes added later still apply to old rows
   const legacy = allVisits.filter((v) => v.ip === COLLAPSED_IP && !isSelfRow(v));
   const visits = allVisits.filter((v) => !isSelfRow(v) && v.ip !== COLLAPSED_IP);
   const selfVisits = allVisits.filter(isSelfRow).length;
